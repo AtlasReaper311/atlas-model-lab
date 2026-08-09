@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=80", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlas-model-lab"
+version = "0.1.0"
+description = "First-principles neural-network and transformer experiments for Atlas Systems."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+  { name = "Atlas Reaper" },
+]
+dependencies = [
+  "numpy>=2.5.1,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.5.0,<2",
+  "mypy>=2.3.0,<3",
+  "pytest>=9.1.1,<10",
+  "ruff>=0.15.22,<0.16",
+]
+
+[project.urls]
+Homepage = "https://atlas-systems.uk"
+Repository = "https://github.com/AtlasReaper311/atlas-model-lab"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "SIM", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
