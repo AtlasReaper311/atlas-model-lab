@@ -19,6 +19,8 @@
 
 `atlas-model-lab` is an experimental learning repository for implementing neural networks and transformer models from first principles. The first lab is deliberately tiny: one trainable linear unit that learns a relationship from examples using gradient descent.
 
+Stage 2 adds the small multilayer-network primitives needed to make manual backpropagation observable. The implementation remains NumPy-only and does not include a training loop yet.
+
 The project keeps infrastructure out of the way. There is no API, deployment, database, hosted model, or production runtime. The point is to understand the mathematics and software mechanics beneath the abstractions used elsewhere in Atlas Systems.
 
 ## Start here
@@ -32,6 +34,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 python examples/01_linear_neuron.py
+python examples/02_multilayer_primitives.py
 ```
 
 Windows PowerShell:
@@ -41,6 +44,7 @@ py -3.12 -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 python examples/01_linear_neuron.py
+python examples/02_multilayer_primitives.py
 ```
 
 The first example learns the relationship `y = 2x + 3` without being given that equation directly.
@@ -50,13 +54,20 @@ The first example learns the relationship `y = 2x + 3` without being given that 
 ```text
 atlas-model-lab/
 ├── examples/
-│   └── 01_linear_neuron.py
+│   ├── 01_linear_neuron.py
+│   └── 02_multilayer_primitives.py
 ├── src/
 │   └── atlas_model_lab/
 │       ├── __init__.py
-│       └── linear.py
+│       ├── gradient_check.py
+│       ├── layers.py
+│       ├── linear.py
+│       └── losses.py
 ├── tests/
-│   └── test_linear.py
+│   ├── test_gradient_check.py
+│   ├── test_layers.py
+│   ├── test_linear.py
+│   └── test_losses.py
 ├── docs/
 │   ├── REPOSITORY-DECISION.md
 │   └── ROADMAP.md
@@ -90,6 +101,31 @@ Training repeatedly:
 4. moves both parameters a small amount in the direction that reduces error.
 
 The implementation is intentionally readable before it is general.
+
+## What Stage 2 contains
+
+Stage 2 is a first-principles forward and backward pass for a tiny
+multilayer network:
+
+- `Dense` computes `Y = X @ W + b` and its manual `dX`, `dW`, and `db` formulas;
+- `ReLU` keeps positive values and defines its derivative as zero at exactly zero;
+- `softmax` subtracts each row's maximum logit before exponentiation, preventing overflow for extreme logits;
+- `cross_entropy` measures the negative log probability assigned to the correct class;
+- `softmax_cross_entropy` uses a stable log-sum-exp calculation for logits;
+- `softmax_cross_entropy_backward` exposes the simplified `(probabilities - one_hot_targets) / batch_size` derivative;
+- `check_gradient` compares those analytical derivatives with centred finite differences.
+
+Finite-difference checking is useful evidence because it estimates the slope
+of the complete forward calculation by nudging one value at a time. When that
+independent estimate agrees with the hand-written derivative, the backward
+formula is being checked against the behaviour it is meant to describe.
+
+The Stage 2 example is intentionally not a training program. It performs one
+forward pass, one manual backward pass, and a gradient check:
+
+```bash
+python examples/02_multilayer_primitives.py
+```
 
 ## Validation
 

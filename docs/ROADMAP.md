@@ -28,6 +28,9 @@ Implement with NumPy:
 
 Exit condition: analytical gradients match numerical gradients within a declared tolerance.
 
+Status: implemented with deterministic NumPy primitives, explicit backward
+formulas, and finite-difference tests covering each required gradient.
+
 ## Stage 3: synthetic classification
 
 Compose the primitives into a small classifier and intentionally overfit a tiny deterministic dataset.
