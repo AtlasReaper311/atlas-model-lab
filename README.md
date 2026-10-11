@@ -19,7 +19,7 @@
 
 `atlas-model-lab` is an experimental learning repository for implementing neural networks and transformer models from first principles. The first lab is deliberately tiny: one trainable linear unit that learns a relationship from examples using gradient descent.
 
-Stage 2 adds the small multilayer-network primitives needed to make manual backpropagation observable. The implementation remains NumPy-only and does not include a training loop yet.
+Stage 2 adds the multilayer-network primitives needed to make manual backpropagation observable. Stage 3 composes those primitives into a deterministic two-layer classifier that can memorise a bounded synthetic dataset. The implementation remains NumPy-only.
 
 The project keeps infrastructure out of the way. There is no API, deployment, database, hosted model, or production runtime. The point is to understand the mathematics and software mechanics beneath the abstractions used elsewhere in Atlas Systems.
 
@@ -35,6 +35,7 @@ source .venv/bin/activate
 python -m pip install -e '.[dev]'
 python examples/01_linear_neuron.py
 python examples/02_multilayer_primitives.py
+python examples/03_synthetic_classification.py
 ```
 
 Windows PowerShell:
@@ -45,6 +46,7 @@ py -3.12 -m venv .venv
 python -m pip install -e ".[dev]"
 python examples/01_linear_neuron.py
 python examples/02_multilayer_primitives.py
+python examples/03_synthetic_classification.py
 ```
 
 The first example learns the relationship `y = 2x + 3` without being given that equation directly.
@@ -55,15 +57,18 @@ The first example learns the relationship `y = 2x + 3` without being given that 
 atlas-model-lab/
 ├── examples/
 │   ├── 01_linear_neuron.py
-│   └── 02_multilayer_primitives.py
+│   ├── 02_multilayer_primitives.py
+│   └── 03_synthetic_classification.py
 ├── src/
 │   └── atlas_model_lab/
 │       ├── __init__.py
+│       ├── classification.py
 │       ├── gradient_check.py
 │       ├── layers.py
 │       ├── linear.py
 │       └── losses.py
 ├── tests/
+│   ├── test_classification.py
 │   ├── test_gradient_check.py
 │   ├── test_layers.py
 │   ├── test_linear.py
@@ -104,8 +109,7 @@ The implementation is intentionally readable before it is general.
 
 ## What Stage 2 contains
 
-Stage 2 is a first-principles forward and backward pass for a tiny
-multilayer network:
+Stage 2 is a first-principles forward and backward pass for a tiny multilayer network:
 
 - `Dense` computes `Y = X @ W + b` and its manual `dX`, `dW`, and `db` formulas;
 - `ReLU` keeps positive values and defines its derivative as zero at exactly zero;
@@ -115,16 +119,32 @@ multilayer network:
 - `softmax_cross_entropy_backward` exposes the simplified `(probabilities - one_hot_targets) / batch_size` derivative;
 - `check_gradient` compares those analytical derivatives with centred finite differences.
 
-Finite-difference checking is useful evidence because it estimates the slope
-of the complete forward calculation by nudging one value at a time. When that
-independent estimate agrees with the hand-written derivative, the backward
-formula is being checked against the behaviour it is meant to describe.
+Finite-difference checking is useful evidence because it estimates the slope of the complete forward calculation by nudging one value at a time. When that independent estimate agrees with the hand-written derivative, the backward formula is being checked against the behaviour it is meant to describe.
 
-The Stage 2 example is intentionally not a training program. It performs one
-forward pass, one manual backward pass, and a gradient check:
+The Stage 2 example performs one forward pass, one manual backward pass, and a gradient check:
 
 ```bash
 python examples/02_multilayer_primitives.py
+```
+
+## What Stage 3 contains
+
+Stage 3 turns the Stage 2 primitives into a complete learning loop.
+
+The bounded experiment uses eight deterministic two-dimensional examples and a fixed `2 -> 4 -> 2` network. Each training update:
+
+1. runs a forward pass through Dense, ReLU, and Dense layers;
+2. measures softmax cross-entropy loss;
+3. backpropagates the loss through the hand-written Stage 2 derivatives;
+4. applies explicit full-batch gradient descent to weights and biases;
+5. records the resulting loss and accuracy.
+
+The purpose is intentional overfitting. Memorising all eight examples proves that the forward path, loss, backward path, and parameter updates work together as one trainable system. It is not evidence of generalisation and it is not a production classifier.
+
+Run the Stage 3 experiment with:
+
+```bash
+python examples/03_synthetic_classification.py
 ```
 
 ## Validation
@@ -167,6 +187,6 @@ The learning sequence is kept in [`docs/ROADMAP.md`](docs/ROADMAP.md). The order
 
 ## How it fits into Atlas Systems
 
-Atlas Systems already evaluates, retrieves from, and operates language models. This repository works at the opposite end of the stack by rebuilding the mechanics beneath those systems. The first stage covers gradients and optimisation directly with NumPy; later stages progress through multilayer networks, transformer blocks, and GPT-style architecture experiments.
+Atlas Systems already evaluates, retrieves from, and operates language models. This repository works at the opposite end of the stack by rebuilding the mechanics beneath those systems. Stages 1 through 3 now cover scalar optimisation, manual multilayer derivatives, and a complete deterministic classifier training loop; later stages progress through reproducible dataset experiments, optimisers, transformer blocks, and GPT-style architecture experiments.
 
 Part of [atlas-systems.uk](https://atlas-systems.uk) · MIT License
