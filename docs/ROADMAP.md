@@ -37,6 +37,11 @@ Compose the primitives into a small classifier and intentionally overfit a tiny 
 
 Exit condition: the network can memorise a bounded dataset, making forward, backward, loss, and parameter updates observable.
 
+Status: implemented as a deterministic 2 -> 4 -> 2 NumPy classifier trained
+with explicit full-batch gradient descent. The bounded eight-example dataset is
+memorised reproducibly, with loss and accuracy recorded before and after every
+parameter update.
+
 ## Stage 4: MNIST
 
 Train a multilayer perceptron on MNIST.
