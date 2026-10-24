@@ -183,7 +183,11 @@ The intended public classification must be registered through current `atlas-inf
 
 ## Roadmap
 
-The learning sequence is kept in [`docs/ROADMAP.md`](docs/ROADMAP.md). The order is intentional: prove each mathematical layer before adding another abstraction.
+The full learning and applied-ML programme is in [docs/ROADMAP.md](docs/ROADMAP.md). Stages 1-3 are implemented; Stage 4 (MNIST) is next. Later stages cover optimisers, controlled experiments, a tiny Transformer and a GPT-2-style decoder. The roadmap specifies data provenance, reproducibility and acceptance gates rather than treating a successful training run as production suitability.
+
+A separate [SPECULAR Neural State Engine roadmap](docs/SPECULAR-NEURAL-STATE-ENGINE-ROADMAP.md) describes a proposed long-term application: a small, evidence-backed model that interprets machine telemetry over time for Ramone while **preserving raw SPECULAR readings and the existing deterministic detector**. The proposed model would not replace Ramone's LLM. It is **planning only**: no training data capture, private data, inference service, tool integration, model deployment or live verification is implemented by these documents.
+
+The roadmap also describes a possible interactive Model Lab experience using real recorded experiment results, explicit evidence labels and accessible comparisons. That public experience is optional presentation work, not a claim of present availability.
 
 ## How it fits into Atlas Systems
 
